@@ -42,7 +42,7 @@ class GameSenseCommunicator
 	{
 		SendPost("bind_game_event", "{\"game\":\"FOO_GAMESENSE_OLED\",\"event\":\"MEDIA_PLAYBACK\",\"handlers\":[{\"device-type\":\"screened-128x52\",\"zone\":\"one\",\"mode\":\"screen\",\"datas\":[{\"lines\":[{\"has-text\":true,\"context-frame-key\":\"track-name\"},{\"has-text\":true,\"context-frame-key\":\"artist-name\"},{\"has-progress-bar\":true}]}]}]}");
 		SendPost("bind_game_event", "{\"game\":\"FOO_GAMESENSE_OLED\",\"event\":\"MEDIA_PAUSED\",\"handlers\":[{\"device-type\":\"screened-128x52\",\"zone\":\"one\",\"mode\":\"screen\",\"datas\":[{\"icon-id\":25,\"lines\":[{\"has-text\":true,\"context-frame-key\":\"track-name\"},{\"has-text\":true,\"context-frame-key\":\"artist-name\"}]}]}]}");
-		SendPost("bind_game_event", "{\"game\":\"FOO_GAMESENSE_OLED\",\"event\":\"MEDIA_CREDITS\",\"handlers\":[{\"device-type\":\"screened-128x52\",\"zone\":\"one\",\"mode\":\"screen\",\"datas\":[{\"icon-id\":41,\"lines\":[{\"has-text\":true,\"context-frame-key\":\"track-name\"},{\"has-text\":true,\"context-frame-key\":\"artist-name\"}]}]}]}");
+		SendPost("bind_game_event", "{\"game\":\"FOO_GAMESENSE_OLED\",\"event\":\"MEDIA_CREDITS\",\"handlers\":[{\"device-type\":\"screened-128x52\",\"zone\":\"one\",\"mode\":\"screen\",\"datas\":[{\"icon-id\":40,\"lines\":[{\"has-text\":true,\"context-frame-key\":\"track-name\"},{\"has-text\":true,\"context-frame-key\":\"artist-name\"}]}]}]}");
 
 	}
 	void SendCreditsEvent()
@@ -158,21 +158,11 @@ public:
 			return;
 		}
 		EnterCriticalSection(m_pSection);
-		m_CurrentTrackName = pszTrackName;
-		m_CurrentTrackName += "   ";
+		
+		m_OriginalTrackName = pszTrackName;
+		m_OriginalTrackName += "   ";
+		m_CurrentTrackName = m_OriginalTrackName;
 		LeaveCriticalSection(m_pSection);
-	}
-	void SetAlbumName(const char* pszAlbumName)
-	{
-		if (!pszAlbumName)
-		{
-			return;
-		}
-		EnterCriticalSection(m_pSection);
-		m_CurrentAlbumName = pszAlbumName;
-		m_CurrentAlbumName += "   ";
-		LeaveCriticalSection(m_pSection);
-
 	}
 	void SetArtistName(const char* pszArtistName)
 	{
@@ -181,8 +171,10 @@ public:
 			return;
 		}
 		EnterCriticalSection(m_pSection);
-		m_CurrentArtistName = pszArtistName;
-		m_CurrentArtistName += "   ";
+		m_OriginalArtistName = pszArtistName;
+		m_OriginalArtistName += "   ";
+		m_CurrentArtistName = m_OriginalArtistName;
+
 		LeaveCriticalSection(m_pSection);
 
 	}
@@ -197,12 +189,16 @@ public:
 	void SetPlaybackType(PlaybackType type)
 	{
 		m_PlayBackType = type;
+		m_CurrentArtistName = m_OriginalArtistName;
+		m_CurrentTrackName = m_OriginalTrackName;
 	}
 	
 private:
+	
 	std::string				m_CurrentTrackName;
-	std::string				m_CurrentAlbumName;
 	std::string				m_CurrentArtistName;
+	std::string				m_OriginalTrackName;
+	std::string				m_OriginalArtistName;
 	GameSenseCommunicator	m_Communicator;
 	LPCRITICAL_SECTION		m_pSection;
 	double					m_nTrackDuration;
