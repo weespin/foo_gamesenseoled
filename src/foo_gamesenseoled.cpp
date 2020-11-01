@@ -207,7 +207,7 @@ private:
 	bool					m_bIsInited = false;
 };
 static GameSenseOled* pOledManager;
-void MyThread()
+void MainThread()
 {
 	pOledManager = new GameSenseOled();
 	while(true)
@@ -217,26 +217,14 @@ void MyThread()
 	}
 }
 
-BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason,LPVOID lpvReserved)
-{
-	switch (fdwReason) {
-	case DLL_PROCESS_ATTACH:
-		CreateThread(0,0,(LPTHREAD_START_ROUTINE)MyThread,0,0,0);
-		break;
-	case DLL_THREAD_ATTACH:
-		break;
-	case DLL_THREAD_DETACH:
-		break;
-	case DLL_PROCESS_DETACH:
-		break;
-	}
-	return TRUE;
-}
 
 class my_play_callback_static : public play_callback_static
 {
 protected:
-	my_play_callback_static() : m_target(SIZE_MAX), m_counter(0) {}
+	my_play_callback_static() : m_target(SIZE_MAX), m_counter(0)
+	{
+		CreateThread(0,0, (LPTHREAD_START_ROUTINE)MainThread,0,0,0);
+	}
 	~my_play_callback_static() {}
 
 	void on_playback_new_track(metadb_handle_ptr p_track) override
